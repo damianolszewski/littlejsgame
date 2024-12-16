@@ -75,13 +75,15 @@ class GUI {
 
             GameManager.getInstance().gold -= this.upgradePackButton.cost;
             GameManager.getInstance().currentPackUpgrade++;
+
             if(GameManager.getInstance().currentPackUpgrade > GameManager.getInstance().maxPackUpgrades) {
+                GameManager.getInstance().currentPackUpgrade = GameManager.getInstance().maxPackUpgrades;
                 this.upgradePackButton.cost = "Maxed";
                 this.upgradePackButton.onClick = () => {
                     console.log('Pack already maxed');
                 }
             } else {
-                this.upgradePackButton.cost = (GameManager.getInstance().currentPackUpgrade * 25) + 25;
+                this.upgradePackButton.cost = Math.floor(((GameManager.getInstance().currentPackUpgrade * 25) + 25) * 1.1);
                 soundManager.playUpgradeSound();
             }
         }
@@ -127,7 +129,7 @@ class GUI {
             }
 
             GameManager.getInstance().gold -= this.upgradeSellValueButton.cost;
-            GameManager.getInstance().sellMultiplier += 0.5;
+            GameManager.getInstance().sellMultiplier += 0.2;
             this.upgradeSellValueButton.cost = Number(this.upgradeSellValueButton.cost * 1.5).toFixed(0);
             soundManager.playUpgradeSound();
             this.sellAllButton.cost = -1 * GameManager.getInstance().getAllAnimalsSellValue();
@@ -329,6 +331,8 @@ class GUI {
         this.drawCompletionText();
         this.drawChancesText();
         this.drawEffectChancesText();
+        this.drawCurrentAmountOfAnimals();
+        this.drawCurrentSellValue();
         let selectedAnimal = GameManager.getInstance().selectedAnimal;
         if(selectedAnimal) {
             this.drawSelectedAnimalName(selectedAnimal.name);
@@ -647,6 +651,32 @@ class GUI {
             5,
             Color.BLACK,
             "center",
+            "courier"
+        );
+    }
+
+    drawCurrentAmountOfAnimals() {
+        drawTextScreen(
+            "Stickers in pack: " + GameManager.getInstance().numberOfAnimals,
+            vec2(mainCanvasSize.x/1.53, 50), //position
+            20,   // size
+            Color.BLACK,
+            3.5,
+            GUI.DARK_GOLD_COLOR,
+            "left",
+            "courier"
+        );
+    }
+
+    drawCurrentSellValue() {
+        drawTextScreen(
+            "Sell Multiplier: " + (1 - GameManager.getInstance().sellMultiplier) * 100 + "%",
+            vec2(mainCanvasSize.x/1.53, 70), //position
+            20,   // size
+            Color.BLACK,
+            3.5,
+            GUI.DARK_RARE_COLOR,
+            "left",
             "courier"
         );
     }

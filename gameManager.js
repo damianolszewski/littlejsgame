@@ -40,7 +40,7 @@ class GameManager {
                 this.animals = [];
                 this.zoo = new Set();
                 this.selectedAnimal = null;
-                this.numberOfAnimals = 5;
+                this.numberOfAnimals = 4;
                 this.createPack();
 
                 this.animalsInitialized = true;
