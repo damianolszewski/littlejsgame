@@ -35,7 +35,7 @@ class GameManager {
                 this.neonAdditionalCost = 100;
 
                 this.data = data;
-                this.gold = 0;
+                this.gold = 99999990;
                 this.sellMultiplier = 1;
                 this.animals = [];
                 this.zoo = new Set();
@@ -54,6 +54,7 @@ class GameManager {
 
                 this.currentPackUpgrade = 1;
                 this.chancesData = data;
+                this.maxPackUpgrades = Object.keys(this.chancesData).length;
                 GUI.getInstance().upgradePackButton.cost = (this.currentPackUpgrade * 25) + 25;
 
                 this.chancesInitialized = true;

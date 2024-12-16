@@ -75,8 +75,15 @@ class GUI {
 
             GameManager.getInstance().gold -= this.upgradePackButton.cost;
             GameManager.getInstance().currentPackUpgrade++;
-            this.upgradePackButton.cost = (GameManager.getInstance().currentPackUpgrade * 25) + 25;
-            soundManager.playUpgradeSound();
+            if(GameManager.getInstance().currentPackUpgrade > GameManager.getInstance().maxPackUpgrades) {
+                this.upgradePackButton.cost = "Maxed";
+                this.upgradePackButton.onClick = () => {
+                    console.log('Pack already maxed');
+                }
+            } else {
+                this.upgradePackButton.cost = (GameManager.getInstance().currentPackUpgrade * 25) + 25;
+                soundManager.playUpgradeSound();
+            }
         }
 
         this.upgradeAmountButton = this.createCostButton(
