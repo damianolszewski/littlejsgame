@@ -130,7 +130,7 @@ class GUI {
 
             GameManager.getInstance().gold -= this.upgradeSellValueButton.cost;
             GameManager.getInstance().sellMultiplier += 0.2;
-            this.upgradeSellValueButton.cost = Number(this.upgradeSellValueButton.cost * 1.5).toFixed(0);
+            this.upgradeSellValueButton.cost = Number(this.upgradeSellValueButton.cost * 1.2).toFixed(0);
             soundManager.playUpgradeSound();
             this.sellAllButton.cost = -1 * GameManager.getInstance().getAllAnimalsSellValue();
         }
@@ -670,7 +670,7 @@ class GUI {
 
     drawCurrentSellValue() {
         drawTextScreen(
-            "Sell Multiplier: " + (1 - GameManager.getInstance().sellMultiplier) * 100 + "%",
+            "Sell Multiplier: " + Math.round(GameManager.getInstance().sellMultiplier * 100) + "%",
             vec2(mainCanvasSize.x/1.53, 70), //position
             20,   // size
             Color.BLACK,
