@@ -246,19 +246,16 @@ class GameManager {
     }
 
     upgradeBlackAndWhite() {
-        this.removeGold(this.blackAndWhiteAdditionalCost);
         this.blackAndWhiteChance += 0.04;
         this.blackAndWhiteChance = Math.min(this.blackAndWhiteChance, this.maxBlackAndWhite);
     }
 
     upgrade3D() {
-        this.removeGold(this._3DAdditionalCost);
         this._3DChance += 0.03;
         this._3DChance = Math.min(this._3DChance, this.max3d);
     }
 
     upgradeNeon() {
-        this.removeGold(this.neonAdditionalCost);
         this.neonChance += 0.02;
         this.neonChance = Math.min(this.neonChance, this.maxNeon);
     }
