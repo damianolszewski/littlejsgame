@@ -172,6 +172,7 @@ class GameManager {
             animal.destroy();
         }
 
+        this.selectedAnimal = null;
         this.animals = [];
         this.state = GameState.IDLE;
         GUI.getInstance().hideAllAnimalButtons();
@@ -186,6 +187,7 @@ class GameManager {
             animal.destroy();
         }
 
+        this.selectedAnimal = null;
         this.animals = [];
         this.state = GameState.IDLE;
         GUI.getInstance().hideAllAnimalButtons();
@@ -240,30 +242,21 @@ class GameManager {
     }
 
     upgradeBlackAndWhite() {
-        if(this.hasEnoughGold(this.blackAndWhiteAdditionalCost))
-        {
-            this.removeGold(this.blackAndWhiteAdditionalCost);
-            this.blackAndWhiteChance += 0.04;
-            this.blackAndWhiteChance = Math.min(this.blackAndWhiteChance, this.maxBlackAndWhite);
-        }
+        this.removeGold(this.blackAndWhiteAdditionalCost);
+        this.blackAndWhiteChance += 0.04;
+        this.blackAndWhiteChance = Math.min(this.blackAndWhiteChance, this.maxBlackAndWhite);
     }
 
     upgrade3D() {
-        if(this.hasEnoughGold(this._3DAdditionalCost))
-        {
-            this.removeGold(this._3DAdditionalCost);
-            this._3DChance += 0.03;
-            this._3DChance = Math.min(this._3DChance, this.max3d);
-        }
+        this.removeGold(this._3DAdditionalCost);
+        this._3DChance += 0.03;
+        this._3DChance = Math.min(this._3DChance, this.max3d);
     }
 
     upgradeNeon() {
-        if(this.hasEnoughGold(this.neonAdditionalCost))
-        {
-            this.removeGold(this.neonAdditionalCost);
-            this.neonChance += 0.02;
-            this.neonChance = Math.min(this.neonChance, this.maxNeon);
-        }
+        this.removeGold(this.neonAdditionalCost);
+        this.neonChance += 0.02;
+        this.neonChance = Math.min(this.neonChance, this.maxNeon);
     }
 
     checkIfIdle() {
