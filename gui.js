@@ -670,7 +670,7 @@ class GUI {
 
     drawCurrentSellValue() {
         drawTextScreen(
-            "Sell Multiplier: " + Math.round(GameManager.getInstance().sellMultiplier * 100) + "%",
+            "Sell value: " + Math.round(GameManager.getInstance().sellMultiplier * 100) + "%",
             vec2(mainCanvasSize.x/1.53, 70), //position
             20,   // size
             Color.BLACK,
