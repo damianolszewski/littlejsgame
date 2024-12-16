@@ -256,7 +256,6 @@ class GUI {
         this.goldEmitter.emitRate = 0;
         this.mineGoldButton.onClick = async () => {
             soundManager.playPopSound();
-            console.log('Mining gold');
             GameManager.getInstance().gold++;
             this.goldEmitter.emitRate = 100;
             setTimeout(() => {

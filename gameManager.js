@@ -141,6 +141,10 @@ class GameManager {
             const animalName = AnimalManager.getInstance().getRandomAnimalName();
             const animalType = AnimalManager.getInstance().getRandomAnimalType();
             let isNew = !this.zoo.has(animalType + ":" + animalName);
+            if(isNew) {
+                console.log('New animal:', animalName);
+                console.log('Animal type:', animalType);
+            }
             let animal = AnimalManager.getInstance().createAnimal(animalType, pos, animalName, isNew);
             this.animals.push(animal);
         }
@@ -231,7 +235,7 @@ class GameManager {
         if(this.selectedAnimal)
         {
             soundManager.playKeepSound();
-            this.zoo.add(this.selectedAnimal.animalType + ":" + this.selectedAnimal.name);
+            this.zoo.add(this.selectedAnimal.type + ":" + this.selectedAnimal.name);
             this.selectedAnimal.destroy();
             this.animals.splice(this.animals.indexOf(this.selectedAnimal), 1);
             this.selectedAnimal = null;

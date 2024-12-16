@@ -44,22 +44,18 @@ class Button extends EngineObject {
         }
 
         if (this.mouseIsOver && !mouseWasOver) {
-            console.log("Mouse is over button");
             this.onEnter();
         }
         if (!this.mouseIsOver && mouseWasOver) {
-            console.log("Mouse is no longer over button");
             this.onLeave();
         }
         if (mouseWasPressed(0) && this.mouseIsOver)
         {
-            console.log("Mouse was pressed over button");
             this.mouseIsHeld = true;
             this.onPress();
         }
         else if (this.mouseIsHeld && !mouseIsDown(0))
         {
-            console.log("Mouse was released over button");
             this.mouseIsHeld = false;
             if (this.mouseIsOver)
                 this.onClick();

@@ -35,11 +35,7 @@ class AnimalManager {
     let random = randomGenerator.float(0, 1);
     let randomRarity = 0;
     for (let rarity in this.animalsPerRarity) {
-      console.log("roll: " + random);
-      console.log("rarity check: " + rarity);
-      console.log("chance: " + chances[rarity]);
       if (random < chances[rarity]) {
-        console.log("rarity: " + rarity);
         randomRarity = rarity;
         break;
       }
