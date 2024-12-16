@@ -23,7 +23,20 @@ class GameManager {
 
                 AnimalManager.getInstance().initialize(data.animals);
 
-                this.gold = 2000;
+                this.maxBlackAndWhite = 0.4;
+                this.max3d = 0.3;
+                this.maxNeon = 0.2;
+                this.blackAndWhiteChance = 0;
+                this._3DChance = 0;
+                this.neonChance = 0;
+                this.normalChance = 1;
+                this.blackAndWhiteAdditionalCost = 10;
+                this._3DAdditionalCost = 40;
+                this.neonAdditionalCost = 100;
+
+                this.data = data;
+                this.gold = 0;
+                this.sellMultiplier = 1;
                 this.animals = [];
                 this.zoo = new Set();
                 this.selectedAnimal = null;
@@ -126,7 +139,9 @@ class GameManager {
             const pos = vec2(offsetX, offsetY); // Position on the circle
 
             const animalName = AnimalManager.getInstance().getRandomAnimalName();
-            let animal = AnimalManager.getInstance().createAnimal(pos, animalName);
+            const animalType = AnimalManager.getInstance().getRandomAnimalType();
+            let isNew = !this.zoo.has(animalType + ":" + animalName);
+            let animal = AnimalManager.getInstance().createAnimal(animalType, pos, animalName, isNew);
             this.animals.push(animal);
         }
     }
@@ -140,21 +155,33 @@ class GameManager {
         }
     }
 
+    getAllAnimalsSellValue() {
+        let value = 0;
+        for(const animal of this.animals)
+        {
+            value += this.getSellValue(animal);
+        }
+        return value;
+    }
+
     sellAllAnimals() {
         for(const animal of this.animals)
         {
-            this.addGold(animal.cost);
+            soundManager.playSellSound();
+            this.addGold(this.getSellValue(animal));
             animal.destroy();
         }
 
         this.animals = [];
         this.state = GameState.IDLE;
         GUI.getInstance().hideAllAnimalButtons();
+        GUI.getInstance().hideSingularAnimalButtons();
     }
 
     keepAllAnimals() {
         for(const animal of this.animals)
         {
+            soundManager.playKeepSound();
             this.zoo.add(animal.name);
             animal.destroy();
         }
@@ -162,13 +189,14 @@ class GameManager {
         this.animals = [];
         this.state = GameState.IDLE;
         GUI.getInstance().hideAllAnimalButtons();
+        GUI.getInstance().hideSingularAnimalButtons();
     }
 
     sellAnimal() {
         if(this.selectedAnimal)
         {
             soundManager.playSellSound();
-            this.addGold(this.selectedAnimal.cost);
+            this.addGold(this.getSellValue(this.selectedAnimal));
             this.selectedAnimal.destroy();
             this.animals.splice(this.animals.indexOf(this.selectedAnimal), 1);
             this.selectedAnimal = null;
@@ -178,11 +206,30 @@ class GameManager {
         this.checkIfIdle();
     }
 
+    getSellValue(animal) {
+        let baseCost = 0;
+        switch(animal.type) {
+            case AnimalType.BLACK_AND_WHITE:
+                baseCost = animal.cost + this.blackAndWhiteAdditionalCost;
+                break;
+            case AnimalType._3D:
+                baseCost = animal.cost + this._3DAdditionalCost;
+                break;
+            case AnimalType.NEON:
+                baseCost = animal.cost + this.neonAdditionalCost;
+                break;
+            default:
+                baseCost = animal.cost;
+                break;
+        }
+        return Math.floor(baseCost * this.sellMultiplier);
+    }
+
     keepAnimal() {
         if(this.selectedAnimal)
         {
             soundManager.playKeepSound();
-            this.zoo.add(this.selectedAnimal.name);
+            this.zoo.add(this.selectedAnimal.animalType + ":" + this.selectedAnimal.name);
             this.selectedAnimal.destroy();
             this.animals.splice(this.animals.indexOf(this.selectedAnimal), 1);
             this.selectedAnimal = null;
@@ -190,6 +237,33 @@ class GameManager {
         }
 
         this.checkIfIdle();
+    }
+
+    upgradeBlackAndWhite() {
+        if(this.hasEnoughGold(this.blackAndWhiteAdditionalCost))
+        {
+            this.removeGold(this.blackAndWhiteAdditionalCost);
+            this.blackAndWhiteChance += 0.04;
+            this.blackAndWhiteChance = Math.min(this.blackAndWhiteChance, this.maxBlackAndWhite);
+        }
+    }
+
+    upgrade3D() {
+        if(this.hasEnoughGold(this._3DAdditionalCost))
+        {
+            this.removeGold(this._3DAdditionalCost);
+            this._3DChance += 0.03;
+            this._3DChance = Math.min(this._3DChance, this.max3d);
+        }
+    }
+
+    upgradeNeon() {
+        if(this.hasEnoughGold(this.neonAdditionalCost))
+        {
+            this.removeGold(this.neonAdditionalCost);
+            this.neonChance += 0.02;
+            this.neonChance = Math.min(this.neonChance, this.maxNeon);
+        }
     }
 
     checkIfIdle() {

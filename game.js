@@ -71,16 +71,20 @@ engineInit(
     gameRender, 
     gameRenderPost, 
     [
-        'sprites/animals.png', 
-        'sprites/base_pack.png', 
-        'sprites/new.png', 
-        'sprites/tear.png', 
-        'sprites/tiles.png', 
-        'sprites/rarityText/uncommon.png', 
-        'sprites/rarityText/rare.png', 
-        'sprites/rarityText/epic.png', 
-        'sprites/rarityText/legendary.png',
-        'sprites/border.png',
-        'sprites/coin.png',
+        'sprites/animals.png', //0
+        'sprites/base_pack.png', //1
+        'sprites/new.png', //2
+        'sprites/tear.png', //3
+        'sprites/tiles.png', //4
+        'sprites/rarityText/uncommon.png', //5
+        'sprites/rarityText/rare.png', //6
+        'sprites/rarityText/epic.png', //7
+        'sprites/rarityText/legendary.png', //8
+        'sprites/border.png', //9
+        'sprites/coin.png', //10
+        'sprites/buttons.png', //11
+        'sprites/black_and_white.png', //12
+        'sprites/3d.png', //13
+        'sprites/neon.png' //14
     ]
 );

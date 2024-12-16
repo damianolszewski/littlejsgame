@@ -4,9 +4,11 @@ class Button extends EngineObject {
     onLeave() {}
     onPress() {}
     onClick() {}
+    onHide() {}
+    onShow() {}
 
-    constructor(pos, size, text, hoverTextColor, textSize = 2) {
-        super(pos, size, tile(0, vec2(2001, 1183), 9));
+    constructor(pos, size, text, hoverTextColor, textSize = 2, imageIndex = 0) {
+        super(pos, size, tile(imageIndex, vec2(480, 240), 11));
 
         this.startSize = size;
         this.text = text
@@ -17,6 +19,11 @@ class Button extends EngineObject {
         this.baseColor = new Color(1, 1, 1, 1);
 
         this.textColor = this.baseColor;
+
+        this.shadowObject = new EngineObject(pos, size, tile(imageIndex, vec2(480, 240), 11));
+        this.shadowObject.color = new Color(0, 0, 0, 0.5);
+        this.renderOrder = 1;
+        this.addChild(this.shadowObject, vec2(0.25, -0.25));
     }
 
     update() {
@@ -26,9 +33,9 @@ class Button extends EngineObject {
         const mouseWasOver = this.mouseIsOver;
         this.mouseIsOver = isMouseOver(this);
         if (this.mouseIsOver) {
-            this.size = this.size.lerp(vec2(this.startSize.x + 0.2, this.startSize.y + 0.2), 0.1);
+            this.size = this.size.lerp(vec2(this.startSize.x + 0.5, this.startSize.y + 0.5), 0.1);
             //smoth transition to 2.5 without vector lerp because its single value
-            this.textSize = this.textSize + ((this.startTextSize + 0.2) - this.textSize) * 0.1;
+            this.textSize = this.textSize + ((this.startTextSize + 0.5) - this.textSize) * 0.1;
             this.textColor = this.hoverTextColor
         } else {
             this.size = this.size.lerp(this.startSize, 0.1);
@@ -73,18 +80,22 @@ class Button extends EngineObject {
     hide() {
         this.hidden = true;
         this.size = vec2(0);
+        this.shadowObject.size = vec2(0);
+        this.onHide();
     }
 
     show() {
         this.hidden = false;
         this.size = this.startSize;
+        this.shadowObject.size = this.startSize;
+        this.onShow();
     }
 }
 
 class CostButton extends Button {
 
-    constructor(cost, pos, size, text, hoverTextColor, textSize = 2, costTextSize = 2, addsGold = false) {
-        super(pos, size, text, hoverTextColor, textSize);
+    constructor(cost, pos, size, text, hoverTextColor, textSize = 2, costTextSize = 2, addsGold = false, imageIndex = 0) {
+        super(pos, size, text, hoverTextColor, textSize, imageIndex);
 
         this.costTextSize = costTextSize;
 
@@ -92,6 +103,7 @@ class CostButton extends Button {
         this.cost = cost;
 
         this.costIcon = new EngineObject(pos, vec2(0.7), tile(0, vec2(128, 128), 10));
+        this.costIcon.renderOrder = 1;
         this.addChild(this.costIcon, vec2(0.5, -0.7));
     }
 
@@ -118,5 +130,15 @@ class CostButton extends Button {
                 "courier"
             );
         }
+    }
+
+    hide() {
+        super.hide();
+        this.costIcon.size = vec2(0);
+    }
+
+    show() {
+        super.show();
+        this.costIcon.size = vec2(0.7);
     }
 }

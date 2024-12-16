@@ -1,6 +1,8 @@
 class SoundManager {
     constructor() {
         this.sounds = [];
+        this.muted = false;
+        this.volume = 0.5;
 
         this.tearSound = new SoundWave("sounds/tear.mp3");
 
@@ -17,43 +19,57 @@ class SoundManager {
         this.legendaryRaritySound = new SoundWave("sounds/rarity/legendary.wav");
     }
 
+    toggleMute() {
+        this.muted = !this.muted;
+    }
+
     playTearSound() {
-        this.tearSound.play();
+        if(this.muted) return;
+        this.tearSound.play(vec2(), this.volume);
     }
 
     playUncommonRaritySound() {
-        this.uncommonRaritySound.play();
+        if(this.muted) return;
+        this.uncommonRaritySound.play(vec2(), this.volume);
     }
 
     playRareRaritySound() {
-        this.rareRaritySound.play();
+        if(this.muted) return;
+        this.rareRaritySound.play(vec2(), this.volume);
     }
 
     playEpicRaritySound() {
-        this.epicRaritySound.play();
+        if(this.muted) return;
+        this.epicRaritySound.play(vec2(), this.volume);
     }
 
     playLegendaryRaritySound() {
-        this.legendaryRaritySound.play();
+        if(this.muted) return;
+        this.legendaryRaritySound.play(vec2(), this.volume);
     }
 
     playSellSound() {
-        this.sellSound.play();
+        if(this.muted) return;
+        this.sellSound.play(vec2(), this.volume);
     }
 
     playKeepSound() {
-        this.keepSound.play();
+        if(this.muted) return;
+        this.keepSound.play(vec2(), this.volume);
     }
 
     playPopSound() {
-        this.popSound.play();
+        if(this.muted) return;
+        this.popSound.play(vec2(), this.volume);
     }
 
     playUpgradeSound() {
-        this.upgradeSound.play();
+        if(this.muted) return;
+        this.upgradeSound.play(vec2(), this.volume);
     }
 
     playSelectSound() {
-        this.selectSound.play();
+        if(this.muted) return;
+        this.selectSound.play(vec2(), this.volume);
     }
 }
