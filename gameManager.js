@@ -182,7 +182,7 @@ class GameManager {
         for(const animal of this.animals)
         {
             soundManager.playKeepSound();
-            this.zoo.add(animal.name);
+            this.zoo.add(animal.type + ":" + animal.name);
             animal.destroy();
         }
 
