@@ -8,32 +8,43 @@ const GameState = {
 
 class GameManager {
     static instance = null;
+
     static getInstance() {
-        if(GameManager.instance == null) {
+        if (GameManager.instance == null) {
             GameManager.instance = new GameManager();
         }
         return GameManager.instance;
     }
 
     constructor() {
+        this.loadProgress();
+
         fetch('data/animals.json')
             .then(response => response.json())
             .then(data => {
-                console.log('Animal Data Loaded:', data);
-
                 AnimalManager.getInstance().initialize(data.animals);
-
                 this.particlesEnabled = true;
 
-                this.maxBlackAndWhite = 0.3;
-                this.maxBraided = 0.25;
-                this.max3d = 0.2;
-                this.maxNeon = 0.1;
+                if(!this.blackAndWhiteUpgrade) {
+                    this.blackAndWhiteUpgrade = 1;
+                }
+                if(!this.braidedUpgrade) {
+                    this.braidedUpgrade = 1;
+                }
+                if(!this._3DUpgrade) {
+                    this._3DUpgrade = 1;
+                }
+                if(!this.neonUpgrade) {
+                    this.neonUpgrade = 1;
+                }
+                if(!this.sellValueUpgrade) {
+                    this.sellValueUpgrade = 1;
+                }
 
-                this.blackAndWhiteChance = 0;
-                this.braidedChance = 0;
-                this._3DChance = 0;
-                this.neonChance = 0;
+                this.blackAndWhiteChance = this.blackAndWhiteChance || 0;
+                this.braidedChance = this.braidedChance || 0;
+                this._3DChance = this._3DChance || 0;
+                this.neonChance = this.neonChance || 0;
                 this.normalChance = 1;
 
                 this.blackAndWhiteAdditionalCost = 10;
@@ -42,31 +53,89 @@ class GameManager {
                 this.neonAdditionalCost = 250;
 
                 this.data = data;
-                this.gold = 0;
-                this.sellMultiplier = 1;
                 this.animals = [];
-                this.zoo = new Set();
                 this.selectedAnimal = null;
-                this.numberOfAnimals = 4;
-                this.createPack();
 
                 this.animalsInitialized = true;
-            })
-            .catch(error => console.error('Error loading animal data:', error));
+            });
 
         fetch('data/chances.json')
             .then(response => response.json())
             .then(data => {
-                console.log('Chances Data Loaded:', data);
-
-                this.currentPackUpgrade = 1;
                 this.chancesData = data;
                 this.maxPackUpgrades = Object.keys(this.chancesData).length;
-                GUI.getInstance().upgradePackButton.cost = (this.currentPackUpgrade * 25) + 25;
+
+                if (!this.currentPackUpgrade) {
+                    this.currentPackUpgrade = 1;
+                }
 
                 this.chancesInitialized = true;
-            })
-            .catch(error => console.error('Error loading chances data:', error));
+            });
+    }
+
+    saveProgress() {
+        const progress = {
+            gold: this.gold,
+            zoo: Array.from(this.zoo),
+            blackAndWhiteChance: this.blackAndWhiteChance,
+            braidedChance: this.braidedChance,
+            _3DChance: this._3DChance,
+            neonChance: this.neonChance,
+            sellMultiplier: this.sellMultiplier,
+            numberOfAnimals: this.numberOfAnimals,
+            blackAndWhiteUpgrade: this.blackAndWhiteUpgrade,
+            braidedUpgrade: this.braidedUpgrade,
+            _3DUpgrade: this._3DUpgrade,
+            neonUpgrade: this.neonUpgrade,
+            sellValueUpgrade: this.sellValueUpgrade,
+            currentPackUpgrade: this.currentPackUpgrade
+        };
+        localStorage.setItem("gameProgress", JSON.stringify(progress));
+    }
+
+    loadProgress() {
+        const savedProgress = localStorage.getItem("gameProgress");
+        if (savedProgress) {
+            const progress = JSON.parse(savedProgress);
+            this.gold = progress.gold || 0;
+            this.zoo = new Set(progress.zoo || []);
+            this.blackAndWhiteChance = progress.blackAndWhiteChance || 0;
+            this.braidedChance = progress.braidedChance || 0;
+            this._3DChance = progress._3DChance || 0;
+            this.neonChance = progress.neonChance || 0;
+            this.sellMultiplier = progress.sellMultiplier || 1;
+            this.numberOfAnimals = progress.numberOfAnimals || 4;
+            this.blackAndWhiteUpgrade = progress.blackAndWhiteUpgrade || 1;
+            this.braidedUpgrade = progress.braidedUpgrade || 1;
+            this._3DUpgrade = progress._3DUpgrade || 1;
+            this.neonUpgrade = progress.neonUpgrade || 1;
+            this.currentPackUpgrade = progress.currentPackUpgrade || 1;
+            this.sellValueUpgrade = progress.sellValueUpgrade || 1;
+            this.state = GameState.IDLE;
+        } else {
+            this.gold = 0;
+            this.zoo = new Set();
+            this.blackAndWhiteChance = 0;
+            this.braidedChance = 0;
+            this._3DChance = 0;
+            this.neonChance = 0;
+            this.sellMultiplier = 1;
+            this.numberOfAnimals = 4;
+            this.blackAndWhiteUpgrade = 1;
+            this.braidedUpgrade = 1;
+            this._3DUpgrade = 1;
+            this.neonUpgrade = 1;
+            this.currentPackUpgrade = 1;
+            this.sellValueUpgrade = 1;
+            this.state = GameState.IDLE;
+
+            this.createPack();
+        }
+
+        this.maxBlackAndWhite = 0.3;
+        this.maxBraided = 0.25;
+        this.max3d = 0.2;
+        this.maxNeon = 0.1;
     }
 
     isInitialized() {
@@ -84,90 +153,61 @@ class GameManager {
             soundManager.playTearSound();
             this.pack.openPack();
             this.state = GameState.PACK_OPENING_ANIMATION;
-            console.log('Pack opening animation started');
-        }
+        };
     }
 
     update() {
-        if(this.state === GameState.PACK_OPENING_ANIMATION) {
+        this.saveProgress();
+
+        if (this.state === GameState.PACK_OPENING_ANIMATION) {
             this.pack.update();
-
-            console.log('Waiting for pack opening animation to finish');
-
-            if(this.pack.isOpened) {
+            if (this.pack.isOpened) {
                 this.state = GameState.PACK_OPENED;
-                console.log('Pack opened');
+                this.createAnimals();
+                GUI.getInstance().showAllAnimalButtons();
             }
-        }
-        else if(this.state === GameState.PACK_OPENED)
-        {
-            console.log('Creating animals');
-            this.createAnimals();
+        } else if (this.state === GameState.PACK_OPENED) {
             this.state = GameState.ANIMALS_CREATED;
-
-            GUI.getInstance().showAllAnimalButtons();
-        } 
-        else if(this.state === GameState.ANIMALS_CREATED) 
-        {
-            if(mouseWasPressed(2)) {
-                console.log('Deselecting animal');
+        } else if (this.state === GameState.ANIMALS_CREATED) {
+            if (mouseWasPressed(2)) {
                 this.deselectAnimal();
-            }
-            else if(mouseWasPressed(0)) {
-                console.log('Checking if animal is selected');
+            } else if (mouseWasPressed(0)) {
                 this.checkAnimalSelection();
             }
         }
     }
 
     checkAnimalSelection() {
-        for(const animal of this.animals)
-        {
-            if(isMouseOver(animal))
-            {
-                if(this.selectedAnimal)
-                {
+        for (const animal of this.animals) {
+            if (isMouseOver(animal)) {
+                if (this.selectedAnimal) {
                     this.selectedAnimal.deselect();
                 }
                 this.selectedAnimal = animal;
                 this.selectedAnimal.select();
-
                 GUI.getInstance().showSingularAnimalButtons();
                 break;
             }
         }
     }
 
-    createAnimals() {
-        const radius = 5; // Adjust radius as needed
-        // for (let i = 0; i < this.numberOfAnimals; i++) {
-        //     const angle = (2 * Math.PI / this.numberOfAnimals) * i; // Evenly spaced angle
-        //     const offsetX = radius * Math.cos(angle);
-        //     const offsetY = radius * Math.sin(angle);
-        //     const pos = vec2(offsetX, offsetY); // Position on the circle
+    deselectAnimal() {
+        if (this.selectedAnimal) {
+            this.selectedAnimal.deselect();
+            this.selectedAnimal = null;
+            GUI.getInstance().hideSingularAnimalButtons();
+        }
+    }
 
-        //     const animalName = AnimalManager.getInstance().getRandomAnimalName();
-        //     const animalType = AnimalManager.getInstance().getRandomAnimalType();
-        //     let isNew = !this.zoo.has(animalType + ":" + animalName);
-        //     if(isNew) {
-        //         console.log('New animal:', animalName);
-        //         console.log('Animal type:', animalType);
-        //         // if is new then move animal a bit from the center of the circle
-        //         pos.x += Math.random() * 0.2 - 0.1;
-        //         pos.y += Math.random() * 0.2 - 0.1;
-        //     }
-        //     let animal = AnimalManager.getInstance().createAnimal(animalType, pos, animalName, isNew);
-        //     this.animals.push(animal);
-        // }
-        //use points from poisson disk sampling
+    createAnimals() {
         const sampler = new PoissonDiskSampler(-9, 9, -6, 6, this.numberOfAnimals, 4);
         const points = sampler.generatePoints();
         for (let i = 0; i < points.length; i++) {
             const pos = points[i];
             const animalName = AnimalManager.getInstance().getRandomAnimalName();
             const animalType = AnimalManager.getInstance().getRandomAnimalType();
-            let isNew = !this.zoo.has(animalType + ":" + animalName);
-            let animal = AnimalManager.getInstance().createAnimal(animalType, pos, animalName, isNew);
+            const isNew = !this.zoo.has(animalType + ":" + animalName);
+            const animal = AnimalManager.getInstance().createAnimal(animalType, pos, animalName, isNew);
             this.animals.push(animal);
         }
     }
@@ -318,21 +358,30 @@ class GameManager {
     upgradeBlackAndWhite() {
         this.blackAndWhiteChance += 0.02;
         this.blackAndWhiteChance = Math.min(this.blackAndWhiteChance, this.maxBlackAndWhite);
+        this.blackAndWhiteUpgrade++;
     }
 
     upgradeBraided() {
         this.braidedChance += 0.0125;
         this.braidedChance = Math.min(this.braidedChance, this.maxBraided);
+        this.braidedUpgrade++;
     }
 
     upgrade3D() {
         this._3DChance += 0.01;
         this._3DChance = Math.min(this._3DChance, this.max3d);
+        this._3DUpgrade++;
     }
 
     upgradeNeon() {
         this.neonChance += 0.005;
         this.neonChance = Math.min(this.neonChance, this.maxNeon);
+        this.neonUpgrade++;
+    }
+
+    upgradeSellValue() {
+        this.sellMultiplier += 0.2;
+        this.sellValueUpgrade++;
     }
 
     checkIfIdle() {

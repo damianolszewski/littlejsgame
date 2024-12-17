@@ -59,7 +59,7 @@ class GUI {
         }
 
         this.upgradePackButton = this.createCostButton(
-            "???",
+            10 + (GameManager.getInstance().currentPackUpgrade * GameManager.getInstance().currentPackUpgrade * 5),
             vec2(-15, 0), 
             vec2(8, 4), 
             "Upgrade Chances", 
@@ -85,13 +85,13 @@ class GUI {
                     console.log('Pack already maxed');
                 }
             } else {
-                this.upgradePackButton.cost = this.upgradePackButton.cost + Math.floor(((GameManager.getInstance().currentPackUpgrade * 25) + 25));
+                this.upgradePackButton.cost = 10 + (GameManager.getInstance().currentPackUpgrade * GameManager.getInstance().currentPackUpgrade * 5)
                 soundManager.playUpgradeSound();
             }
         }
 
         this.upgradeAmountButton = this.createCostButton(
-            100,
+            Math.pow(2, GameManager.getInstance().numberOfAnimals - 3) * 30,
             vec2(-15, -5), 
             vec2(8, 4), 
             "Upgrade Amount", 
@@ -109,12 +109,12 @@ class GUI {
 
             GameManager.getInstance().gold -= this.upgradeAmountButton.cost;
             GameManager.getInstance().numberOfAnimals++;
-            this.upgradeAmountButton.cost *= 2;
+            this.upgradeAmountButton.cost = Math.pow(2, GameManager.getInstance().numberOfAnimals - 3) * 30;
             soundManager.playUpgradeSound();
         }
 
         this.upgradeSellValueButton = this.createCostButton(
-            50,
+            30 + (GameManager.getInstance().sellValueUpgrade * GameManager.getInstance().sellValueUpgrade * 10),
             vec2(-15, -10), 
             vec2(8, 4), 
             "Upgrade Sell Value", 
@@ -131,14 +131,14 @@ class GUI {
             }
 
             GameManager.getInstance().gold -= this.upgradeSellValueButton.cost;
-            GameManager.getInstance().sellMultiplier += 0.2;
-            this.upgradeSellValueButton.cost = Number(this.upgradeSellValueButton.cost * 1.2).toFixed(0);
+            GameManager.getInstance().upgradeSellValue();
+            this.upgradeSellValueButton.cost = Number(30 + (GameManager.getInstance().sellValueUpgrade * GameManager.getInstance().sellValueUpgrade * 10)).toFixed(0);
             soundManager.playUpgradeSound();
             this.keepUnownedSellRestButton.cost = -1 * GameManager.getInstance().getKeepAndSellValue();
         }
 
         this.upgradeBlackAndWhite = this.createCostButton(
-            25,
+            GameManager.getInstance().blackAndWhiteUpgrade * 25,
             vec2(-23, 5), 
             vec2(8, 4), 
             "Upgrade Black and White", 
@@ -148,27 +148,34 @@ class GUI {
             false,
             13
         );
-        this.upgradeBlackAndWhite.onClick = () => {
-            if(GameManager.getInstance().gold < this.upgradeBlackAndWhite.cost) {
-                console.log('Not enough gold to upgrade black and white');
-                return;
+        if(GameManager.getInstance().blackAndWhiteChance >= GameManager.getInstance().maxBlackAndWhite) {
+            this.upgradeBlackAndWhite.cost = "Maxed";
+            this.upgradeBlackAndWhite.onClick = () => {
+                console.log('Black and White already maxed');
             }
-
-            GameManager.getInstance().gold -= this.upgradeBlackAndWhite.cost;
-            GameManager.getInstance().upgradeBlackAndWhite();
-            if(GameManager.getInstance().blackAndWhiteChance >= GameManager.getInstance().maxBlackAndWhite) {
-                this.upgradeBlackAndWhite.cost = "Maxed";
-                this.upgradeBlackAndWhite.onClick = () => {
-                    console.log('Black and White already maxed');
+        } else {
+            this.upgradeBlackAndWhite.onClick = () => {
+                if(GameManager.getInstance().gold < this.upgradeBlackAndWhite.cost) {
+                    console.log('Not enough gold to upgrade black and white');
+                    return;
                 }
-            } else {
-                this.upgradeBlackAndWhite.cost = this.upgradeBlackAndWhite.cost + 25;
+
+                GameManager.getInstance().gold -= this.upgradeBlackAndWhite.cost;
+                GameManager.getInstance().upgradeBlackAndWhite();
+                if(GameManager.getInstance().blackAndWhiteChance >= GameManager.getInstance().maxBlackAndWhite) {
+                    this.upgradeBlackAndWhite.cost = "Maxed";
+                    this.upgradeBlackAndWhite.onClick = () => {
+                        console.log('Black and White already maxed');
+                    }
+                } else {
+                    this.upgradeBlackAndWhite.cost = GameManager.getInstance().blackAndWhiteUpgrade * 25;
+                }
+                soundManager.playUpgradeSound();
             }
-            soundManager.playUpgradeSound();
         }
 
         this.upgradeBraided = this.createCostButton(
-            50,
+            GameManager.getInstance().braidedUpgrade * 50,
             vec2(-23, 0), 
             vec2(8, 4), 
             "Upgrade Braided", 
@@ -178,27 +185,34 @@ class GUI {
             false,
             18
         );
-        this.upgradeBraided.onClick = () => {
-            if(GameManager.getInstance().gold < this.upgradeBraided.cost) {
-                console.log('Not enough gold to upgrade braided');
-                return;
+        if(GameManager.getInstance().braidedChance >= GameManager.getInstance().maxBraided) {
+            this.upgradeBraided.cost = "Maxed";
+            this.upgradeBraided.onClick = () => {
+                console.log('Braided already maxed');
             }
-
-            GameManager.getInstance().gold -= this.upgradeBraided.cost;
-            GameManager.getInstance().upgradeBraided();
-            if(GameManager.getInstance().braidedChance >= GameManager.getInstance().maxBraided) {
-                this.upgradeBraided.cost = "Maxed";
-                this.upgradeBraided.onClick = () => {
-                    console.log('Braided already maxed');
+        } else {
+            this.upgradeBraided.onClick = () => {
+                if(GameManager.getInstance().gold < this.upgradeBraided.cost) {
+                    console.log('Not enough gold to upgrade braided');
+                    return;
                 }
-            } else {
-                this.upgradeBraided.cost = this.upgradeBraided.cost + 50;
+
+                GameManager.getInstance().gold -= this.upgradeBraided.cost;
+                GameManager.getInstance().upgradeBraided();
+                if(GameManager.getInstance().braidedChance >= GameManager.getInstance().maxBraided) {
+                    this.upgradeBraided.cost = "Maxed";
+                    this.upgradeBraided.onClick = () => {
+                        console.log('Braided already maxed');
+                    }
+                } else {
+                    this.upgradeBraided.cost = GameManager.getInstance().braidedUpgrade * 50;
+                }
+                soundManager.playUpgradeSound();
             }
-            soundManager.playUpgradeSound();
         }
 
         this.upgrade3D = this.createCostButton(
-            100,
+            GameManager.getInstance()._3DUpgrade * 100,
             vec2(-23, -5), 
             vec2(8, 4), 
             "Upgrade 3D", 
@@ -208,27 +222,34 @@ class GUI {
             false,
             14
         );
-        this.upgrade3D.onClick = () => {
-            if(GameManager.getInstance().gold < this.upgrade3D.cost) {
-                console.log('Not enough gold to upgrade 3D');
-                return;
+        if(GameManager.getInstance()._3DChance >= GameManager.getInstance().max3d) {
+            this.upgrade3D.cost = "Maxed";
+            this.upgrade3D.onClick = () => {
+                console.log('3D already maxed');
             }
-
-            GameManager.getInstance().gold -= this.upgrade3D.cost;
-            GameManager.getInstance().upgrade3D();
-            if(GameManager.getInstance()._3DChance >= GameManager.getInstance().max3d) {
-                this.upgrade3D.cost = "Maxed";
-                this.upgrade3D.onClick = () => {
-                    console.log('3D already maxed');
+        } else {
+            this.upgrade3D.onClick = () => {
+                if(GameManager.getInstance().gold < this.upgrade3D.cost) {
+                    console.log('Not enough gold to upgrade 3D');
+                    return;
                 }
-            } else {
-                this.upgrade3D.cost = this.upgrade3D.cost + 100;
+    
+                GameManager.getInstance().gold -= this.upgrade3D.cost;
+                GameManager.getInstance().upgrade3D();
+                if(GameManager.getInstance()._3DChance >= GameManager.getInstance().max3d) {
+                    this.upgrade3D.cost = "Maxed";
+                    this.upgrade3D.onClick = () => {
+                        console.log('3D already maxed');
+                    }
+                } else {
+                    this.upgrade3D.cost = GameManager.getInstance()._3DUpgrade * 100;
+                }
+                soundManager.playUpgradeSound();
             }
-            soundManager.playUpgradeSound();
         }
 
         this.upgradeNeon = this.createCostButton(
-            200,
+            GameManager.getInstance().neonUpgrade * 200,
             vec2(-23, -10), 
             vec2(8, 4), 
             "Upgrade Neon", 
@@ -238,23 +259,30 @@ class GUI {
             false,
             17
         );
-        this.upgradeNeon.onClick = () => {
-            if(GameManager.getInstance().gold < this.upgradeNeon.cost) {
-                console.log('Not enough gold to upgrade neon');
-                return;
+        if(GameManager.getInstance().neonChance >= GameManager.getInstance().maxNeon) {
+            this.upgradeNeon.cost = "Maxed";
+            this.upgradeNeon.onClick = () => {
+                console.log('Neon already maxed');
             }
-
-            GameManager.getInstance().gold -= this.upgradeNeon.cost;
-            GameManager.getInstance().upgradeNeon();
-            if(GameManager.getInstance().neonChance >= GameManager.getInstance().maxNeon) {
-                this.upgradeNeon.cost = "Maxed";
-                this.upgradeNeon.onClick = () => {
-                    console.log('Neon already maxed');
+        } else {
+            this.upgradeNeon.onClick = () => {
+                if(GameManager.getInstance().gold < this.upgradeNeon.cost) {
+                    console.log('Not enough gold to upgrade neon');
+                    return;
                 }
-            } else {
-                this.upgradeNeon.cost = this.upgradeNeon.cost + 200;
+
+                GameManager.getInstance().gold -= this.upgradeNeon.cost;
+                GameManager.getInstance().upgradeNeon();
+                if(GameManager.getInstance().neonChance >= GameManager.getInstance().maxNeon) {
+                    this.upgradeNeon.cost = "Maxed";
+                    this.upgradeNeon.onClick = () => {
+                        console.log('Neon already maxed');
+                    }
+                } else {
+                    this.upgradeNeon.cost = GameManager.getInstance().neonUpgrade * 200;
+                }
+                soundManager.playUpgradeSound();
             }
-            soundManager.playUpgradeSound();
         }
 
         this.mineGoldButton = this.createCostButton(
@@ -342,7 +370,7 @@ class GUI {
         }
         this.keepButton.hide();
 
-        this.disableParticlesButton = this.createButton(vec2(15, -8), vec2(5, 2), "Disable Particles", new Color(0.9, 0.9, 0.5, 1), 0.55, 9);
+        this.disableParticlesButton = this.createButton(vec2(15, -6), vec2(5, 2), "Disable Particles", new Color(0.9, 0.9, 0.5, 1), 0.55, 9);
         this.disableParticlesButton.onClick = () => {
             GameManager.getInstance().particlesEnabled = !GameManager.getInstance().particlesEnabled;
             this.disableParticlesButton.text = GameManager.getInstance().particlesEnabled ? "Disable Particles" : "Enable Particles";
@@ -354,17 +382,33 @@ class GUI {
             }
         }
 
-        this.muteButton = this.createButton(vec2(15, -10), vec2(5, 2), "Mute Sounds", new Color(0.9, 0.9, 0.5, 1), 0.55, 7);
+        this.muteButton = this.createButton(vec2(15, -8), vec2(5, 2), "Mute Sounds", new Color(0.9, 0.9, 0.5, 1), 0.55, 7);
         this.muteButton.onClick = () => {
             soundManager.toggleMute();
             this.muteButton.text = soundManager.muted ? "Unmute Sounds" : "Mute Sounds";
         }
 
-        this.postProcessingButton = this.createButton(vec2(15, -12), vec2(5, 2), "Disable Post Processing", new Color(0.9, 0.9, 0.5, 1), 0.55, 8);
+        this.postProcessingButton = this.createButton(vec2(15, -10), vec2(5, 2), "Disable Post Processing", new Color(0.9, 0.9, 0.5, 1), 0.55, 8);
         this.postProcessingButton.onClick = () => {
             postProcessEnabled = !postProcessEnabled;
             this.postProcessingButton.text = postProcessEnabled ? "Disable Post Processing" : "Enable Post Processing";
         }
+
+        this.resetProgressButton = this.createButton(vec2(15, -12), vec2(5, 2), "Reset Progress", new Color(0.9, 0.9, 0.5, 1), 0.55, 21);
+        this.resetConfirmation = false;  // Tracks if the confirmation state is active
+
+        this.resetProgressButton.onClick = () => {
+            if (!this.resetConfirmation) {
+                // First click: ask for confirmation
+                this.resetProgressButton.text = "Are you sure?";
+                this.resetConfirmation = true;
+            } else {
+                // Second click: reset progress
+                localStorage.removeItem("gameProgress");
+                console.log("Progress reset!");
+                location.reload(); // Refresh the page to restart the game
+            }
+        };
 
         console.log('GUI created');
     }
@@ -556,7 +600,7 @@ class GUI {
     }
 
     drawEffectChancesText() {
-        let x = mainCanvasSize.x/1.53 + 210;
+        let x = mainCanvasSize.x/1.53 + 220;
         let y = 100;
         let size = 24;
         let spacing = 20;

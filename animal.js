@@ -135,6 +135,7 @@ class Animal extends Interactable {
     this.emitter = RarityParticleEmitterFactory.createRarityEmitter(rarity);
     if(this.emitter != null) {
       this.addChild(this.emitter, vec2(0, -2.5));
+      this.emitter.emitRate = GameManager.getInstance().particlesEnabled ? 6 : 0;
     }
 
     this.border = new EngineObject(pos, vec2(6.2, 5), tile(0, vec2(2001, 1183), 9), 0);
