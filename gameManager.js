@@ -42,7 +42,7 @@ class GameManager {
                 this.neonAdditionalCost = 250;
 
                 this.data = data;
-                this.gold = 99999990;
+                this.gold = 0;
                 this.sellMultiplier = 1;
                 this.animals = [];
                 this.zoo = new Set();
