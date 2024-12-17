@@ -3,8 +3,9 @@
 const AnimalType = {
   NORMAL: 0,
   BLACK_AND_WHITE: 1,
-  _3D: 2,
-  NEON: 3
+  BRAIDED: 2,
+  _3D: 3,
+  NEON: 4
 }
 
 class AnimalManager {
@@ -50,6 +51,7 @@ class AnimalManager {
     let randomGenerator = new RandomGenerator(Math.random() * 1000);
     let random = randomGenerator.float(0, 1);
     let blackAndWhiteChance = GameManager.getInstance().blackAndWhiteChance
+    let braidedChance = GameManager.getInstance().braidedChance;
     let _3DChance = GameManager.getInstance()._3DChance;
     let neonChance = GameManager.getInstance().neonChance;
 
@@ -57,6 +59,10 @@ class AnimalManager {
       return AnimalType.BLACK_AND_WHITE;
     }
     random -= blackAndWhiteChance;
+    if (random < braidedChance) {
+      return AnimalType.BRAIDED;
+    }
+    random -= braidedChance;
     if (random < _3DChance) {
       return AnimalType._3D;
     }
@@ -86,6 +92,8 @@ class AnimalManager {
     switch(type) {
       case AnimalType.BLACK_AND_WHITE:
         return 12;
+      case AnimalType.BRAIDED:
+        return 15;
       case AnimalType._3D:
         return 13;
       case AnimalType.NEON:
@@ -98,7 +106,8 @@ class AnimalManager {
 
 class Animal extends Interactable {
 
-  static DEFAULT_SCALE = vec2(4);
+  static DEFAULT_SCALE = vec2(3.5);
+  static NEW_SIZE = vec2(4);
 
   constructor(type, pos, angle, spriteIndex, rarity, name, cost, isNew = true) {
     super(pos, Animal.DEFAULT_SCALE, tile(spriteIndex, vec2(200, 200), AnimalManager.getSpriteForType(type)), angle);
@@ -117,15 +126,10 @@ class Animal extends Interactable {
     this.size = vec2(0);
     this.startAnimation = true;
 
-    if(isNew) {
-      this.newText = new EngineObject(pos, vec2(3, 2), tile(0, vec2(249,142), 2), 0);
-      //this.text.color = new Color(0.9, 0.6, 0.1, 1);
-      this.addChild(this.newText, vec2(0, 2.6));
-    }
-
     this.rarityText = RarityTextFactory.createRarityText(rarity);
     if(this.rarityText != null) {
-      this.addChild(this.rarityText, vec2(0, -2.5));
+      this.addChild(this.rarityText, vec2(0, -2));
+      this.rarityText.renderOrder = 5;
     }
 
     this.emitter = RarityParticleEmitterFactory.createRarityEmitter(rarity);
@@ -133,10 +137,25 @@ class Animal extends Interactable {
       this.addChild(this.emitter, vec2(0, -2.5));
     }
 
-    this.border = new EngineObject(pos, vec2(7.5, 5.5), tile(0, vec2(2001, 1183), 9), 0);
+    this.border = new EngineObject(pos, vec2(6.2, 5), tile(0, vec2(2001, 1183), 9), 0);
     this.border.size = vec2(0);
     this.addChild(this.border);
     this.border.localAngle = 1.5;
+
+    if(isNew) {
+      this.newText = new EngineObject(pos, vec2(3, 2), tile(0, vec2(249,142), 2), 0);
+      this.newText.renderOrder = 6;
+      this.addChild(this.newText, vec2(0, 2.3));
+
+      this.border.renderOrder = 4;
+
+      this.renderOrder = 3
+      this.desiredSize = Animal.NEW_SIZE;
+      this.hoverSize = Animal.NEW_SIZE.add(vec2(1));
+    } else {
+      this.desiredSize = Animal.DEFAULT_SCALE;
+      this.hoverSize = Animal.DEFAULT_SCALE.add(vec2(1));
+    }
 
     this.selected = false;
   }
@@ -145,19 +164,19 @@ class Animal extends Interactable {
     super.update();
 
     if(this.startAnimation) {
-      this.size = this.size.lerp(Animal.DEFAULT_SCALE, 0.1);
-      if(this.size.distance(Animal.DEFAULT_SCALE) < 0.1) {
+      this.size = this.size.lerp(this.desiredSize, 0.1);
+      if(this.size.distance(this.desiredSize) < 0.1) {
         this.startAnimation = false;
       }
     }
 
     if(isMouseOver(this))
     {
-      this.size = this.size.lerp(vec2(5), 0.1);
+      this.size = this.size.lerp(this.hoverSize, 0.1);
     }
     else
     {
-      this.size = this.size.lerp(Animal.DEFAULT_SCALE, 0.1);
+      this.size = this.size.lerp(this.desiredSize, 0.1);
     }
 
     const targetAngle = this.direction === 1 ? this.endAngle : this.startAngle;
@@ -171,7 +190,7 @@ class Animal extends Interactable {
 
   select() {
     this.selected = true;
-    this.border.size = vec2(7.5, 5.5);
+    this.border.size = vec2(6.2, 5);
     soundManager.playSelectSound();
   }
 

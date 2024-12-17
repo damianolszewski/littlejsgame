@@ -23,19 +23,26 @@ class GameManager {
 
                 AnimalManager.getInstance().initialize(data.animals);
 
-                this.maxBlackAndWhite = 0.4;
-                this.max3d = 0.3;
-                this.maxNeon = 0.2;
+                this.particlesEnabled = true;
+
+                this.maxBlackAndWhite = 0.3;
+                this.maxBraided = 0.25;
+                this.max3d = 0.2;
+                this.maxNeon = 0.1;
+
                 this.blackAndWhiteChance = 0;
+                this.braidedChance = 0;
                 this._3DChance = 0;
                 this.neonChance = 0;
                 this.normalChance = 1;
+
                 this.blackAndWhiteAdditionalCost = 10;
-                this._3DAdditionalCost = 40;
-                this.neonAdditionalCost = 100;
+                this.braidedAdditionalCost = 40;
+                this._3DAdditionalCost = 100;
+                this.neonAdditionalCost = 250;
 
                 this.data = data;
-                this.gold = 0;
+                this.gold = 99999990;
                 this.sellMultiplier = 1;
                 this.animals = [];
                 this.zoo = new Set();
@@ -133,19 +140,33 @@ class GameManager {
 
     createAnimals() {
         const radius = 5; // Adjust radius as needed
-        for (let i = 0; i < this.numberOfAnimals; i++) {
-            const angle = (2 * Math.PI / this.numberOfAnimals) * i; // Evenly spaced angle
-            const offsetX = radius * Math.cos(angle);
-            const offsetY = radius * Math.sin(angle);
-            const pos = vec2(offsetX, offsetY); // Position on the circle
+        // for (let i = 0; i < this.numberOfAnimals; i++) {
+        //     const angle = (2 * Math.PI / this.numberOfAnimals) * i; // Evenly spaced angle
+        //     const offsetX = radius * Math.cos(angle);
+        //     const offsetY = radius * Math.sin(angle);
+        //     const pos = vec2(offsetX, offsetY); // Position on the circle
 
+        //     const animalName = AnimalManager.getInstance().getRandomAnimalName();
+        //     const animalType = AnimalManager.getInstance().getRandomAnimalType();
+        //     let isNew = !this.zoo.has(animalType + ":" + animalName);
+        //     if(isNew) {
+        //         console.log('New animal:', animalName);
+        //         console.log('Animal type:', animalType);
+        //         // if is new then move animal a bit from the center of the circle
+        //         pos.x += Math.random() * 0.2 - 0.1;
+        //         pos.y += Math.random() * 0.2 - 0.1;
+        //     }
+        //     let animal = AnimalManager.getInstance().createAnimal(animalType, pos, animalName, isNew);
+        //     this.animals.push(animal);
+        // }
+        //use points from poisson disk sampling
+        const sampler = new PoissonDiskSampler(-9, 9, -6, 6, this.numberOfAnimals, 4);
+        const points = sampler.generatePoints();
+        for (let i = 0; i < points.length; i++) {
+            const pos = points[i];
             const animalName = AnimalManager.getInstance().getRandomAnimalName();
             const animalType = AnimalManager.getInstance().getRandomAnimalType();
             let isNew = !this.zoo.has(animalType + ":" + animalName);
-            if(isNew) {
-                console.log('New animal:', animalName);
-                console.log('Animal type:', animalType);
-            }
             let animal = AnimalManager.getInstance().createAnimal(animalType, pos, animalName, isNew);
             this.animals.push(animal);
         }
@@ -160,11 +181,32 @@ class GameManager {
         }
     }
 
-    getAllAnimalsSellValue() {
+    getAllAnimals() {
         let value = 0;
         for(const animal of this.animals)
         {
             value += this.getSellValue(animal);
+        }
+        return value;
+    }
+
+    getKeepAndSellValue() {
+        let value = 0;
+        let calculatedAnimals = new Set();
+        for(const animal of this.animals)
+        {
+            let key = animal.type + ":" + animal.name;
+            if(this.zoo.has(key))
+            {
+                value += this.getSellValue(animal);
+                calculatedAnimals.add(key)
+            } else {
+                if(calculatedAnimals.has(key))
+                {
+                    value += this.getSellValue(animal);
+                }
+                calculatedAnimals.add(key);
+            }
         }
         return value;
     }
@@ -199,6 +241,30 @@ class GameManager {
         GUI.getInstance().hideSingularAnimalButtons();
     }
 
+    keepUnownedSellRest() {
+        for(const animal of this.animals)
+        {
+            if(!this.zoo.has(animal.type + ":" + animal.name))
+            {
+                soundManager.playKeepSound();
+                this.zoo.add(animal.type + ":" + animal.name);
+                animal.destroy();
+            }
+            else
+            {
+                soundManager.playSellSound();
+                this.addGold(this.getSellValue(animal));
+                animal.destroy();
+            }
+        }
+
+        this.selectedAnimal = null;
+        this.animals = [];
+        this.state = GameState.IDLE;
+        GUI.getInstance().hideAllAnimalButtons();
+        GUI.getInstance().hideSingularAnimalButtons();
+    }
+
     sellAnimal() {
         if(this.selectedAnimal)
         {
@@ -218,6 +284,9 @@ class GameManager {
         switch(animal.type) {
             case AnimalType.BLACK_AND_WHITE:
                 baseCost = animal.cost + this.blackAndWhiteAdditionalCost;
+                break;
+            case AnimalType.BRAIDED:
+                baseCost = animal.cost + this.braidedAdditionalCost;
                 break;
             case AnimalType._3D:
                 baseCost = animal.cost + this._3DAdditionalCost;
@@ -247,17 +316,22 @@ class GameManager {
     }
 
     upgradeBlackAndWhite() {
-        this.blackAndWhiteChance += 0.04;
+        this.blackAndWhiteChance += 0.02;
         this.blackAndWhiteChance = Math.min(this.blackAndWhiteChance, this.maxBlackAndWhite);
     }
 
+    upgradeBraided() {
+        this.braidedChance += 0.0125;
+        this.braidedChance = Math.min(this.braidedChance, this.maxBraided);
+    }
+
     upgrade3D() {
-        this._3DChance += 0.03;
+        this._3DChance += 0.01;
         this._3DChance = Math.min(this._3DChance, this.max3d);
     }
 
     upgradeNeon() {
-        this.neonChance += 0.02;
+        this.neonChance += 0.005;
         this.neonChance = Math.min(this.neonChance, this.maxNeon);
     }
 

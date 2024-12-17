@@ -10,6 +10,7 @@
 // post processing - can be enabled to pass other canvases through a final shader
 
 let glPostShader, glPostTexture, glPostIncludeOverlay;
+let postProcessEnabled = true;
 
 /** Set up a post processing shader
  *  @param {String} shaderCode
@@ -53,7 +54,7 @@ function initPostProcess(shaderCode, includeOverlay=false)
     engineAddPlugin(undefined, postProcessRender);
     function postProcessRender()
     {
-        if (headlessMode) return;
+        if (headlessMode || !postProcessEnabled) return;
         
         // prepare to render post process shader
         if (glEnable)
@@ -143,8 +144,8 @@ function setupPostProcess()
         c *= 1. + scanlineAlpha*sin(p.y*scanlineScale);
 
         // black vignette around edges
-        const float vignette = 2.;
-        const float vignettePow = 1.;
+        const float vignette = 2.2;
+        const float vignettePow = 1.2;
         float dx = 2.*p.x-1., dy = 2.*p.y-1.;
         c *= 1.-pow((dx*dx + dy*dy)/vignette, vignettePow);
     }`;

@@ -85,6 +85,7 @@ engineInit(
         'sprites/buttons.png', //11
         'sprites/black_and_white.png', //12
         'sprites/3d.png', //13
-        'sprites/neon.png' //14
+        'sprites/neon.png', //14
+        'sprites/braided.png', //15
     ]
 );

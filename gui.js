@@ -22,6 +22,8 @@ class GUI {
     static DARK_EPIC_COLOR = new Color(0.4, 0.05, 0.35, 1);
     static DARK_LEGENDARY_COLOR = new Color(0.475, 0.25, 0.1, 1);
 
+    static BRAIDED_COLOR = new Color(0.1, 0.3, 0.8, 1);
+    static BRAIDED_OUTLINE_COLOR = new Color(0.2, 0.4, 0.9, 0.4);
     static NEON_COLOR = new Color(0.15, 0.4, 0.2, 0.7);
     static NEON_OUTLINE_COLOR = new Color(0.2, 0.9, 0.3, 0.5);
     static _3D_COLOR = new Color(0, 0, 0, 1);
@@ -83,7 +85,7 @@ class GUI {
                     console.log('Pack already maxed');
                 }
             } else {
-                this.upgradePackButton.cost = Math.floor(((GameManager.getInstance().currentPackUpgrade * 25) + 25) * 1.1);
+                this.upgradePackButton.cost = this.upgradePackButton.cost + Math.floor(((GameManager.getInstance().currentPackUpgrade * 25) + 25));
                 soundManager.playUpgradeSound();
             }
         }
@@ -132,12 +134,12 @@ class GUI {
             GameManager.getInstance().sellMultiplier += 0.2;
             this.upgradeSellValueButton.cost = Number(this.upgradeSellValueButton.cost * 1.2).toFixed(0);
             soundManager.playUpgradeSound();
-            this.sellAllButton.cost = -1 * GameManager.getInstance().getAllAnimalsSellValue();
+            this.keepUnownedSellRestButton.cost = -1 * GameManager.getInstance().getKeepAndSellValue();
         }
 
         this.upgradeBlackAndWhite = this.createCostButton(
-            50,
-            vec2(-23, 2.5), 
+            25,
+            vec2(-23, 5), 
             vec2(8, 4), 
             "Upgrade Black and White", 
             new Color(0.9, 0.9, 0.9, 1),
@@ -154,7 +156,7 @@ class GUI {
 
             GameManager.getInstance().gold -= this.upgradeBlackAndWhite.cost;
             GameManager.getInstance().upgradeBlackAndWhite();
-            if(GameManager.getInstance().blackAndWhiteChance > GameManager.getInstance().maxBlackAndWhite) {
+            if(GameManager.getInstance().blackAndWhiteChance >= GameManager.getInstance().maxBlackAndWhite) {
                 this.upgradeBlackAndWhite.cost = "Maxed";
                 this.upgradeBlackAndWhite.onClick = () => {
                     console.log('Black and White already maxed');
@@ -165,9 +167,39 @@ class GUI {
             soundManager.playUpgradeSound();
         }
 
+        this.upgradeBraided = this.createCostButton(
+            50,
+            vec2(-23, 0), 
+            vec2(8, 4), 
+            "Upgrade Braided", 
+            new Color(0.9, 0.9, 0.9, 1),
+            0.65,
+            0.8,
+            false,
+            18
+        );
+        this.upgradeBraided.onClick = () => {
+            if(GameManager.getInstance().gold < this.upgradeBraided.cost) {
+                console.log('Not enough gold to upgrade braided');
+                return;
+            }
+
+            GameManager.getInstance().gold -= this.upgradeBraided.cost;
+            GameManager.getInstance().upgradeBraided();
+            if(GameManager.getInstance().braidedChance >= GameManager.getInstance().maxBraided) {
+                this.upgradeBraided.cost = "Maxed";
+                this.upgradeBraided.onClick = () => {
+                    console.log('Braided already maxed');
+                }
+            } else {
+                this.upgradeBraided.cost = this.upgradeBraided.cost + 50;
+            }
+            soundManager.playUpgradeSound();
+        }
+
         this.upgrade3D = this.createCostButton(
             100,
-            vec2(-23, -2.5), 
+            vec2(-23, -5), 
             vec2(8, 4), 
             "Upgrade 3D", 
             new Color(0.9, 0.9, 0.9, 1),
@@ -184,20 +216,20 @@ class GUI {
 
             GameManager.getInstance().gold -= this.upgrade3D.cost;
             GameManager.getInstance().upgrade3D();
-            if(GameManager.getInstance()._3DChance > GameManager.getInstance().max3d) {
+            if(GameManager.getInstance()._3DChance >= GameManager.getInstance().max3d) {
                 this.upgrade3D.cost = "Maxed";
                 this.upgrade3D.onClick = () => {
                     console.log('3D already maxed');
                 }
             } else {
-                this.upgrade3D.cost = this.upgrade3D.cost + 50;
+                this.upgrade3D.cost = this.upgrade3D.cost + 100;
             }
             soundManager.playUpgradeSound();
         }
 
         this.upgradeNeon = this.createCostButton(
             200,
-            vec2(-23, -7.5), 
+            vec2(-23, -10), 
             vec2(8, 4), 
             "Upgrade Neon", 
             new Color(0.9, 0.9, 0.9, 1),
@@ -214,13 +246,13 @@ class GUI {
 
             GameManager.getInstance().gold -= this.upgradeNeon.cost;
             GameManager.getInstance().upgradeNeon();
-            if(GameManager.getInstance().neonChance > GameManager.getInstance().maxNeon) {
-                this.upgradeNeon.cost = "Neon Maxed";
+            if(GameManager.getInstance().neonChance >= GameManager.getInstance().maxNeon) {
+                this.upgradeNeon.cost = "Maxed";
                 this.upgradeNeon.onClick = () => {
                     console.log('Neon already maxed');
                 }
             } else {
-                this.upgradeNeon.cost = this.upgradeNeon.cost + 75;
+                this.upgradeNeon.cost = this.upgradeNeon.cost + 200;
             }
             soundManager.playUpgradeSound();
         }
@@ -272,39 +304,66 @@ class GUI {
             }, 50);
         }
 
-        this.sellAllButton = this.createCostButton(0, vec2(15, 0), vec2(7, 3.5), "Sell All", new Color(1, 0.9, 0.2, 1), 0.9, 0.8, true, 13);
-        this.sellAllButton.onClick = () => {
-            GameManager.getInstance().sellAllAnimals();
-        }
-        this.sellAllButton.onShow = () => {
-            this.sellAllButton.cost = -1 * GameManager.getInstance().getAllAnimalsSellValue();
-        }
-        this.sellAllButton.hide();
+        // this.sellAllButton = this.createCostButton(0, vec2(15, 0), vec2(7, 3.5), "Sell All", new Color(1, 0.9, 0.2, 1), 0.9, 0.8, true, 13);
+        // this.sellAllButton.onClick = () => {
+        //     GameManager.getInstance().sellAllAnimals();
+        // }
+        // this.sellAllButton.onShow = () => {
+        //     this.sellAllButton.cost = -1 * GameManager.getInstance().getAllAnimalsSellValue();
+        // }
+        // this.sellAllButton.hide();
 
-        this.keepAllButton = this.createButton(vec2(15, -5), vec2(7, 3.5), "Keep All", new Color(0.1, 0.9, 0.2, 1), 0.85, 9);
-        this.keepAllButton.onClick = () => {
-            GameManager.getInstance().keepAllAnimals();
+        // this.keepAllButton = this.createButton(vec2(15, -5), vec2(7, 3.5), "Keep All", new Color(0.1, 0.9, 0.2, 1), 0.85, 9);
+        // this.keepAllButton.onClick = () => {
+        //     GameManager.getInstance().keepAllAnimals();
+        // }
+        // this.keepAllButton.hide();
+
+        this.keepUnownedSellRestButton = this.createCostButton(0, vec2(15, 0), vec2(7, 3.5), "Keep and Sell", new Color(0.1, 0.9, 0.2, 1), 0.8, 0.8, true, 12);
+        this.keepUnownedSellRestButton.onClick = () => {
+            GameManager.getInstance().keepUnownedSellRest();
         }
-        this.keepAllButton.hide();
+        this.keepUnownedSellRestButton.onShow = () => {
+            this.keepUnownedSellRestButton.cost = -1 * GameManager.getInstance().getKeepAndSellValue();
+        }
+        this.keepUnownedSellRestButton.hide();
 
         this.sellButton = this.createButton(vec2(-4, -11), vec2(7, 3.5), "Sell", new Color(1, 0.9, 0.2, 1), 1.2, 10);
         this.sellButton.onClick = () => {
             GameManager.getInstance().sellAnimal();
-            this.sellAllButton.cost = -1 * GameManager.getInstance().getAllAnimalsSellValue();
+            this.keepUnownedSellRestButton.cost = -1 * GameManager.getInstance().getKeepAndSellValue();
         }
         this.sellButton.hide();
 
         this.keepButton = this.createButton(vec2(4, -11), vec2(7, 3.5), "Keep", new Color(0.1, 0.9, 0.2, 1), 1.2, 11);
         this.keepButton.onClick = () => {
             GameManager.getInstance().keepAnimal();
-            this.sellAllButton.cost = -1 * GameManager.getInstance().getAllAnimalsSellValue();
+            this.keepUnownedSellRestButton.cost = -1 * GameManager.getInstance().getKeepAndSellValue();
         }
         this.keepButton.hide();
+
+        this.disableParticlesButton = this.createButton(vec2(15, -8), vec2(5, 2), "Disable Particles", new Color(0.9, 0.9, 0.5, 1), 0.55, 9);
+        this.disableParticlesButton.onClick = () => {
+            GameManager.getInstance().particlesEnabled = !GameManager.getInstance().particlesEnabled;
+            this.disableParticlesButton.text = GameManager.getInstance().particlesEnabled ? "Disable Particles" : "Enable Particles";
+            //go over all animals and enable/disable particles
+            for(let animal of GameManager.getInstance().animals) {
+                if(animal.emitter) {
+                    animal.emitter.emitRate = GameManager.getInstance().particlesEnabled ? 6 : 0;
+                }
+            }
+        }
 
         this.muteButton = this.createButton(vec2(15, -10), vec2(5, 2), "Mute Sounds", new Color(0.9, 0.9, 0.5, 1), 0.55, 7);
         this.muteButton.onClick = () => {
             soundManager.toggleMute();
             this.muteButton.text = soundManager.muted ? "Unmute Sounds" : "Mute Sounds";
+        }
+
+        this.postProcessingButton = this.createButton(vec2(15, -12), vec2(5, 2), "Disable Post Processing", new Color(0.9, 0.9, 0.5, 1), 0.55, 8);
+        this.postProcessingButton.onClick = () => {
+            postProcessEnabled = !postProcessEnabled;
+            this.postProcessingButton.text = postProcessEnabled ? "Disable Post Processing" : "Enable Post Processing";
         }
 
         console.log('GUI created');
@@ -352,13 +411,11 @@ class GUI {
     }
 
     showAllAnimalButtons() {
-        this.sellAllButton.show();
-        this.keepAllButton.show();
+        this.keepUnownedSellRestButton.show();
     }
 
     hideAllAnimalButtons() {
-        this.sellAllButton.hide();
-        this.keepAllButton.hide();
+        this.keepUnownedSellRestButton.hide();
     }
 
     showSingularAnimalButtons() {
@@ -461,7 +518,7 @@ class GUI {
 
     drawCompletionText() {
         let ownedAnimals = GameManager.getInstance().zoo.size;
-        let totalAnimals = Object.keys(GameManager.getInstance().data.animals).length * 4;
+        let totalAnimals = Object.keys(GameManager.getInstance().data.animals).length * 5;
         let percentage = Number(ownedAnimals / totalAnimals * 100).toFixed(2)
         drawTextScreen(
             "Completed " + percentage + "% [" + ownedAnimals + "/" + totalAnimals + "]",
@@ -479,7 +536,7 @@ class GUI {
         let chances = GameManager.getInstance().getChances();
         let x = mainCanvasSize.x/1.53;
         let y = 100;
-        let size = 24;
+        let size = 25;
         let spacing = 20;
 
         for(let rarity in chances) {
@@ -489,7 +546,7 @@ class GUI {
                 vec2(x, y), //position
                 size,   // size
                 GUI.getColorForRarity(rarityText),
-                1.6,
+                2,
                 Color.BLACK,
                 "left",
                 "courier"
@@ -499,18 +556,19 @@ class GUI {
     }
 
     drawEffectChancesText() {
-        let x = mainCanvasSize.x/1.53 + 200;
+        let x = mainCanvasSize.x/1.53 + 210;
         let y = 100;
         let size = 24;
         let spacing = 20;
 
         //AnimalType
         let blackAndWhiteChance = GameManager.getInstance().blackAndWhiteChance;
+        let braidedChance = GameManager.getInstance().braidedChance;
         let _3DChance = GameManager.getInstance()._3DChance;
         let neonChance = GameManager.getInstance().neonChance;
-        let normalChance = 1 - (blackAndWhiteChance + _3DChance + neonChance);
+        let normalChance = 1 - (blackAndWhiteChance + _3DChance + neonChance + braidedChance);
         drawTextScreen(
-            "Normal: " + Math.floor(normalChance * 100) + '%', 
+            "normal: " + precisionRound(normalChance * 100, 2) + '%', 
             vec2(x, y), //position
             size,   // size
             GUI.DARK_COMMON_COLOR,
@@ -521,7 +579,7 @@ class GUI {
         );
         y += spacing;
         drawTextScreen(
-            "Black and White: " + Math.floor(blackAndWhiteChance * 100) + '%', 
+            "black and white: " + precisionRound(blackAndWhiteChance * 100, 2) + '%', 
             vec2(x, y), //position
             size,   // size
             GUI.BLACK_AND_WHITE_COLOR,
@@ -532,7 +590,18 @@ class GUI {
         );
         y += spacing;
         drawTextScreen(
-            "3D: " + Math.floor(_3DChance * 100) + '%', 
+            "braided: " + precisionRound(braidedChance * 100, 2) + '%', 
+            vec2(x, y), //position
+            size,   // size
+            GUI.BRAIDED_COLOR,
+            1.1,
+            Color.BLACK,
+            "left",
+            "courier"
+        );
+        y += spacing;
+        drawTextScreen(
+            "3D: " + precisionRound(_3DChance  * 100, 2) + '%', 
             vec2(x, y), //position
             size,   // size
             GUI._3D_COLOR,
@@ -543,7 +612,7 @@ class GUI {
         );
         y += spacing;
         drawTextScreen(
-            "Neon: " + Math.floor(neonChance * 100) + '%', 
+            "neon: " + precisionRound(neonChance * 100, 2) + '%', 
             vec2(x, y), //position
             size,   // size
             GUI.NEON_COLOR,
@@ -604,6 +673,12 @@ class GUI {
                 typeText = "Black and White";
                 font = "courier";
                 break;
+            case AnimalType.BRAIDED:
+                typeText = "Braided";
+                font = "impact";
+                color = GUI.BRAIDED_COLOR
+                outlineColor = GUI.BRAIDED_OUTLINE_COLOR
+                break;
             case AnimalType._3D:
                 typeText = "3D";
                 font = "impact";
@@ -657,7 +732,7 @@ class GUI {
 
     drawCurrentAmountOfAnimals() {
         drawTextScreen(
-            "Stickers in pack: " + GameManager.getInstance().numberOfAnimals,
+            "stickers in pack: " + GameManager.getInstance().numberOfAnimals,
             vec2(mainCanvasSize.x/1.53, 50), //position
             20,   // size
             Color.BLACK,
@@ -670,7 +745,7 @@ class GUI {
 
     drawCurrentSellValue() {
         drawTextScreen(
-            "Sell value: " + Math.round(GameManager.getInstance().sellMultiplier * 100) + "%",
+            "sell value: " + Math.round(GameManager.getInstance().sellMultiplier * 100) + "%",
             vec2(mainCanvasSize.x/1.53, 70), //position
             20,   // size
             Color.BLACK,
@@ -681,4 +756,9 @@ class GUI {
         );
     }
     
+}
+
+function precisionRound(number, precision) {
+    var factor = Math.pow(10, precision);
+    return Math.round(number * factor) / factor;
 }
