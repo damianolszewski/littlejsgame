@@ -18,7 +18,7 @@ class AnimalManager {
   }
 
   initialize(animalsData) {
-    this.animalsData = animalsData; // dict where animal name is key, has rarity property
+    this.animalsData = animalsData;
 
     this.animalsPerRarity = {}
     for (let key in this.animalsData) {
@@ -74,7 +74,6 @@ class AnimalManager {
   }
 
   createAnimal(type, pos, animalName, isNew = true) {
-    //angle between -30 and 30 degrees
     let randomGenerator = new RandomGenerator(Math.random() * 1000);
     return new Animal(
       type,
@@ -184,7 +183,6 @@ class Animal extends Interactable {
     this.angle = lerpAngle(this.damping, this.angle, targetAngle);
 
     if (Math.abs(this.angle - targetAngle) < 0.01) {
-      // Reverse direction when target is reached
       this.direction *= -1;
     }
   }

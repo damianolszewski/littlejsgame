@@ -332,21 +332,6 @@ class GUI {
             }, 50);
         }
 
-        // this.sellAllButton = this.createCostButton(0, vec2(15, 0), vec2(7, 3.5), "Sell All", new Color(1, 0.9, 0.2, 1), 0.9, 0.8, true, 13);
-        // this.sellAllButton.onClick = () => {
-        //     GameManager.getInstance().sellAllAnimals();
-        // }
-        // this.sellAllButton.onShow = () => {
-        //     this.sellAllButton.cost = -1 * GameManager.getInstance().getAllAnimalsSellValue();
-        // }
-        // this.sellAllButton.hide();
-
-        // this.keepAllButton = this.createButton(vec2(15, -5), vec2(7, 3.5), "Keep All", new Color(0.1, 0.9, 0.2, 1), 0.85, 9);
-        // this.keepAllButton.onClick = () => {
-        //     GameManager.getInstance().keepAllAnimals();
-        // }
-        // this.keepAllButton.hide();
-
         this.keepUnownedSellRestButton = this.createCostButton(0, vec2(15, 0), vec2(7, 3.5), "Keep and Sell", new Color(0.1, 0.9, 0.2, 1), 0.8, 0.8, true, 12);
         this.keepUnownedSellRestButton.onClick = () => {
             GameManager.getInstance().keepUnownedSellRest();
@@ -374,7 +359,6 @@ class GUI {
         this.disableParticlesButton.onClick = () => {
             GameManager.getInstance().particlesEnabled = !GameManager.getInstance().particlesEnabled;
             this.disableParticlesButton.text = GameManager.getInstance().particlesEnabled ? "Disable Particles" : "Enable Particles";
-            //go over all animals and enable/disable particles
             for(let animal of GameManager.getInstance().animals) {
                 if(animal.emitter) {
                     animal.emitter.emitRate = GameManager.getInstance().particlesEnabled ? 6 : 0;
@@ -395,18 +379,16 @@ class GUI {
         }
 
         this.resetProgressButton = this.createButton(vec2(15, -12), vec2(5, 2), "Reset Progress", new Color(0.9, 0.9, 0.5, 1), 0.55, 21);
-        this.resetConfirmation = false;  // Tracks if the confirmation state is active
+        this.resetConfirmation = false;
 
         this.resetProgressButton.onClick = () => {
             if (!this.resetConfirmation) {
-                // First click: ask for confirmation
                 this.resetProgressButton.text = "Are you sure?";
                 this.resetConfirmation = true;
             } else {
-                // Second click: reset progress
                 localStorage.removeItem("gameProgress");
                 console.log("Progress reset!");
-                location.reload(); // Refresh the page to restart the game
+                location.reload();
             }
         };
 
@@ -539,7 +521,6 @@ class GUI {
             case "legendary":
                 return 4;
             default:
-                //throw error
                 console.error("Invalid rarity: " + rarity);
         }
     }
@@ -547,7 +528,7 @@ class GUI {
     drawGoldText() {
         drawTextScreen(
             GameManager.getInstance().gold,
-            vec2(mainCanvasSize.x/4, 70), //position
+            vec2(mainCanvasSize.x/4, 70),
             50,   // size
             GUI.GOLD_COLOR,
             2,
@@ -566,7 +547,7 @@ class GUI {
         let percentage = Number(ownedAnimals / totalAnimals * 100).toFixed(2)
         drawTextScreen(
             "Completed " + percentage + "% [" + ownedAnimals + "/" + totalAnimals + "]",
-            vec2(mainCanvasSize.x/4, 120), //position
+            vec2(mainCanvasSize.x/4, 120),
             25,   // size
             GUI.LEGENDARY_COLOR,
             2,
@@ -587,8 +568,8 @@ class GUI {
             let rarityText = GUI.getRarityForIndex(rarity);
             drawTextScreen(
                 rarityText + ': ' + Math.floor(chances[rarity] * 100) + '%', 
-                vec2(x, y), //position
-                size,   // size
+                vec2(x, y),
+                size,
                 GUI.getColorForRarity(rarityText),
                 2,
                 Color.BLACK,
@@ -605,7 +586,6 @@ class GUI {
         let size = 24;
         let spacing = 20;
 
-        //AnimalType
         let blackAndWhiteChance = GameManager.getInstance().blackAndWhiteChance;
         let braidedChance = GameManager.getInstance().braidedChance;
         let _3DChance = GameManager.getInstance()._3DChance;
@@ -613,8 +593,8 @@ class GUI {
         let normalChance = 1 - (blackAndWhiteChance + _3DChance + neonChance + braidedChance);
         drawTextScreen(
             "normal: " + precisionRound(normalChance * 100, 2) + '%', 
-            vec2(x, y), //position
-            size,   // size
+            vec2(x, y),
+            size,
             GUI.DARK_COMMON_COLOR,
             1.6,
             Color.BLACK,
@@ -624,8 +604,8 @@ class GUI {
         y += spacing;
         drawTextScreen(
             "black and white: " + precisionRound(blackAndWhiteChance * 100, 2) + '%', 
-            vec2(x, y), //position
-            size,   // size
+            vec2(x, y),
+            size,
             GUI.BLACK_AND_WHITE_COLOR,
             1.6,
             Color.WHITE,
@@ -635,8 +615,8 @@ class GUI {
         y += spacing;
         drawTextScreen(
             "braided: " + precisionRound(braidedChance * 100, 2) + '%', 
-            vec2(x, y), //position
-            size,   // size
+            vec2(x, y),
+            size,
             GUI.BRAIDED_COLOR,
             1.1,
             Color.BLACK,
@@ -646,8 +626,8 @@ class GUI {
         y += spacing;
         drawTextScreen(
             "3D: " + precisionRound(_3DChance  * 100, 2) + '%', 
-            vec2(x, y), //position
-            size,   // size
+            vec2(x, y),
+            size,
             GUI._3D_COLOR,
             4,
             GUI._3D_OUTLINE_COLOR,
@@ -657,8 +637,8 @@ class GUI {
         y += spacing;
         drawTextScreen(
             "neon: " + precisionRound(neonChance * 100, 2) + '%', 
-            vec2(x, y), //position
-            size,   // size
+            vec2(x, y),
+            size,
             GUI.NEON_COLOR,
             4,
             GUI.NEON_OUTLINE_COLOR,
