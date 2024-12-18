@@ -412,6 +412,7 @@ class GUI {
     }
 
     render() {
+        this.drawTitleText();
         this.drawGoldText();
         this.drawCompletionText();
         this.drawChancesText();
@@ -528,7 +529,7 @@ class GUI {
     drawGoldText() {
         drawTextScreen(
             GameManager.getInstance().gold,
-            vec2(mainCanvasSize.x/4, 70),
+            vec2(mainCanvasSize.x/4, 130),
             50,   // size
             GUI.GOLD_COLOR,
             2,
@@ -538,7 +539,7 @@ class GUI {
         );
 
         let tileImage = textureInfos[10].image 
-        mainContext.drawImage(tileImage, mainCanvasSize.x/4 + 15, 50, 36, 36);
+        mainContext.drawImage(tileImage, mainCanvasSize.x/4 + 15, 110, 36, 36);
     }
 
     drawCompletionText() {
@@ -547,10 +548,10 @@ class GUI {
         let percentage = Number(ownedAnimals / totalAnimals * 100).toFixed(2)
         drawTextScreen(
             "Completed " + percentage + "% [" + ownedAnimals + "/" + totalAnimals + "]",
-            vec2(mainCanvasSize.x/4, 120),
-            25,   // size
+            vec2(mainCanvasSize.x/3.6, 180),
+            26,   // size
             GUI.LEGENDARY_COLOR,
-            2,
+            4,
             GUI.DARK_LEGENDARY_COLOR,
             "right",
             "courier"
@@ -777,6 +778,19 @@ class GUI {
             GUI.DARK_RARE_COLOR,
             "left",
             "courier"
+        );
+    }
+3.6
+    drawTitleText() {
+        drawTextScreen(
+            'ANIMAL GATCHA', 
+            vec2(mainCanvasSize.x/5.2, 70), //position
+            50,   // size
+            new Color(0.9, 0.6, 0.3, 1),
+            10,
+            new Color(0.4, 0.2, 0.1, 1),
+            "center",
+            "impact"
         );
     }
     
